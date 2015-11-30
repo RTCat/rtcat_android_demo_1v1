@@ -63,6 +63,7 @@ public class ChatActivity extends Activity {
 
         int screenWidth  = getWindowManager().getDefaultDisplay().getWidth();
         int width = 0;
+        //大屏幕适配
         if(screenWidth > 1500)
         {
             width = 80;
@@ -86,39 +87,38 @@ public class ChatActivity extends Activity {
     }
 
 
-    public void createSession()
-    {
+    public void createSession(){
         Intent intent = getIntent();
         final String token = intent.getStringExtra(MainActivity.TOKEN);
-        createSession(token);
-    }
-
-    public void createSession(final String token){
+        //线程工具, execute 新建一个线程
         executor.requestStart();
         executor.execute(new Runnable() {
             @Override
             public void run() {
 
                 try {
-
+                    //通过 token初始化一个session
                     session = cat.createSession(token);
-
+                    //实现SessionObserver接口的SessionHandler类,用来监听Session触发事件
                     class SessionHandler implements SessionObserver {
+                        //监听用户连入session事件
                         @Override
                         public void in(String token) {
 
 
                             JSONObject attr = new JSONObject();
+
                             SessionSendConfig ssc = new SessionSendConfig(localStream, attr, false);
+                            //sendTo用于和其他用户(某一用户)建立连接并发送Stream,建立数据通道, 可以通过attr自己附带属性
                             session.sendTo(ssc, token);
                         }
-
+                        //监听用户离开session事件,这里由于是 1对1,所以有人离开session就结束Acitivy
                         @Override
                         public void out(String token) {
                             l(token + "is out");
                             over();
                         }
-
+                        //连接到Session时触发,返回session里已有的用户
                         @Override
                         public void connected(JSONArray wits) {
                             String wit = "";
@@ -134,18 +134,21 @@ public class ChatActivity extends Activity {
 
                             JSONObject attr = new JSONObject();
                             SessionSendConfig ssc = new SessionSendConfig(localStream, attr, false);
+                            //区别sendTo给在session中的所有用户发送.
                             session.send(ssc);
                         }
 
+                        //获得远程通道
                         @Override
                         public void remote(final Receiver receiver) {
                             try {
+                                //通过一个 List来维护receiver
                                 receivers.put(receiver.getId(), receiver);
-
+                                //给receiver增加一个ReceiverObserver,用于触发监听事件
                                 receiver.addObserver(new ReceiverObserver() {
                                     @Override
                                     public void stream(final Stream stream) {
-
+                                        //收到远程流,并播放 (需要自己动态增加一个GLSurfaceView对象).
                                         runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
@@ -177,7 +180,7 @@ public class ChatActivity extends Activity {
 
 
                         }
-
+                        //获得本地通道
                         @Override
                         public void local(Sender sender) {
                             senders.put(sender.getId(), sender);
@@ -195,9 +198,9 @@ public class ChatActivity extends Activity {
                     }
 
                     SessionHandler sh = new SessionHandler();
-
+                    //增加观察者,一定要在 connect方法之前执行.
                     session.addObserver(sh);
-
+                    //连接服务器
                     session.connect();
 
                 } catch (Exception e) {
@@ -278,6 +281,7 @@ public class ChatActivity extends Activity {
         {
             localStream.dispose();
         }
+
 
     }
 }
