@@ -1,3 +1,6 @@
+## 实时猫 Android SDK Demo
+根据[实时猫 Android SDK](https://shishimao.com) 开发的 Demo
+
 ## 说明
 此样例通过和[后台](https://github.com/RTCat/rtcat_android_demo_1v1_backend)交互，实现1对1视频和音频聊天功能
 
