@@ -26,7 +26,7 @@ public class MainActivity extends Activity {
     private Socket mSocket;
     {
         try {
-            mSocket = IO.socket("http://rtcat.io:3000");
+            mSocket = IO.socket("http://rtcat.io:1111");
         } catch (URISyntaxException e) {}
     }
     @Override
